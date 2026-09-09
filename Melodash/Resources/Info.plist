@@ -13,5 +13,26 @@
 		<string>Orbitron-Black.ttf</string>
 		<string>Orbitron-Regular.ttf</string>
 	</array>
+
+	<!-- Sparkle. Melodash is distributed outside the App Store, so it has to
+	     ship its own updater; without one, every user stays on whatever build
+	     they happened to download. -->
+
+	<!-- Appcast must be served over HTTPS: Sparkle authenticates the feed by
+	     TLS and each update by the EdDSA signature below. -->
+	<key>SUFeedURL</key>
+	<string>https://www.melodash.app/appcast.xml</string>
+
+	<!-- Public half of the EdDSA key pair. The private half lives in the
+	     developer's login keychain and signs each release; Sparkle refuses any
+	     update that does not verify against this value. -->
+	<key>SUPublicEDKey</key>
+	<string>Hz6Ps2MOVH9z/rwE4hNrbvyphxdcj9goWh7A3VMuofc=</string>
+
+	<!-- Ask on second launch rather than deciding for the user. -->
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

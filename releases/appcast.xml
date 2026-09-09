@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Melodash</title>
+        <item>
+            <title>1.0</title>
+            <pubDate>Wed, 09 Sep 2026 13:26:57 +0800</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://www.melodash.app/releases/Melodash-1.0.dmg" length="27488889" type="application/octet-stream" sparkle:edSignature="Mnh3sLSXh+rvAK9MPOfWY1+sf3XAzEvkpVAjJOJa5pVfDbcawvY7x0KptRuibjySnVNZDqjzqiHLyTvp+l3xCw=="/>
+        </item>
+    </channel>
+</rss>

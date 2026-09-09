@@ -2,21 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- App Sandbox (required for the Mac App Store; macOS-only key, ignored on iOS). -->
-	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<!-- Melodash ships direct from melodash.app, not the Mac App Store, so it
+	     runs unsandboxed under the hardened runtime instead. The two device
+	     entitlements below are still required: the hardened runtime gates
+	     camera and microphone access the same way the sandbox did.
+
+	     Dropping the sandbox also lets imported songs be re-opened by plain
+	     path across launches, rather than only through security-scoped
+	     bookmarks. If Melodash ever goes to the Mac App Store, re-add
+	     com.apple.security.app-sandbox, the network-client key, and
+	     com.apple.security.files.user-selected.read-only. -->
+
 	<!-- Front / FaceTime camera for emotion scoring. -->
 	<key>com.apple.security.device.camera</key>
 	<true/>
 	<!-- Microphone for pitch / timing scoring. -->
 	<key>com.apple.security.device.audio-input</key>
-	<true/>
-	<!-- Outbound network for Apple Music (MusicKit) and remote lyric lookup. -->
-	<key>com.apple.security.network.client</key>
-	<true/>
-	<!-- Read user-picked local audio files (imported songs), re-opened across
-	     launches via security-scoped bookmarks. -->
-	<key>com.apple.security.files.user-selected.read-only</key>
 	<true/>
 </dict>
 </plist>
