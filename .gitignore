@@ -13,3 +13,8 @@ xcuserdata/
 # Create ML training project — 130MB checkpoints, exceeds GitHub's file limit.
 # The exported model (Melodash/MelodashEmotionClassifier.mlmodel) IS committed.
 mlproject/
+
+# Release artifacts. The DMGs are large and re-buildable, but generate_appcast
+# needs past DMGs present locally to keep listing them in the feed — keep them
+# out of git, keep them on disk. appcast.xml itself stays tracked.
+releases/*.dmg
