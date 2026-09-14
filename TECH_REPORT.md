@@ -7,7 +7,8 @@
 > whole battle: setup → avatars → turn order → per-turn performance & results → final podium.
 >
 > Built with **SwiftUI + SwiftData**, Apple frameworks only (Vision, Core ML, AVFoundation,
-> Accelerate, MusicKit). Runs on **macOS and iOS** from one codebase.
+> Accelerate, MusicKit). Ships for **macOS**, distributed direct rather than via the App Store
+> (see [§13](#13-distribution--app-store-considerations)).
 
 ---
 
@@ -25,7 +26,8 @@
 10. [Privacy, permissions & graceful degradation](#10-privacy-permissions--graceful-degradation)
 11. [Accessibility & localization](#11-accessibility--localization)
 12. [Known limitations & future work](#12-known-limitations--future-work)
-13. [Appendix — module map](#13-appendix--module-map)
+13. [Distribution & App Store considerations](#13-distribution--app-store-considerations)
+14. [Appendix — module map](#14-appendix--module-map)
 
 ---
 
@@ -414,7 +416,9 @@ Apple Music id + artwork URL) live flat on the model and are read by `source`.
 ## 10. Privacy, permissions & graceful degradation
 
 Everything runs **on-device**. Camera frames and audio are analyzed live and **never uploaded or
-persisted**. The app runs in the **App Sandbox** with exactly three capabilities — camera,
+persisted**. Shipping outside the Mac App Store, the app runs **unsandboxed under the hardened
+runtime** — which still gates camera and microphone, so those entitlements remain. Under the App
+Sandbox it previously declared three capabilities — camera,
 microphone, and outbound network — and the network is used **only** for Apple Music (MusicKit)
 and public lyric lookup (a song's title/artist/duration). Usage-description strings say plainly
 what each is for.
@@ -460,7 +464,65 @@ subscription surfaces a **dismissible warning** rather than silent failure.
 
 ---
 
-## 13. Appendix — module map
+## 13. Distribution & App Store considerations
+
+### 13.1 The pipeline
+
+`scripts/release.sh` runs archive → Developer ID export → notarize → staple → **verify with
+`spctl`** → signed, notarized DMG → Sparkle appcast. It fails rather than emit a build Gatekeeper
+would reject.
+
+That guard is not theoretical. The first public build was correctly signed with a Developer ID
+certificate but **never notarized**: `ENABLE_HARDENED_RUNTIME` was off, and notarization requires
+it, so the submission could never have succeeded. `spctl` reported `rejected — source=Unnotarized
+Developer ID`, meaning Gatekeeper blocked it on every Mac but the developer's — for an app that
+then asks for microphone *and* camera.
+
+### 13.2 What signing does not tell you
+
+Signing, notarization, stapling and `spctl` all pass on a binary that cannot resolve its own
+frameworks. None of them start the process. An early Sparkle build kept
+`LD_RUNPATH_SEARCH_PATHS = @executable_path/Frameworks` — the **iOS** layout — while the framework
+is copied to `Contents/Frameworks`; on macOS that rpath resolves to `Contents/MacOS/Frameworks`, so
+dyld aborted at launch with `Library not loaded: @rpath/Sparkle.framework/…`. The build was fully
+notarized and Gatekeeper-approved, and crashed for every user.
+
+**Release verification therefore ends where a user starts:** install from the DMG to
+`/Applications`, launch it, confirm the process survives.
+
+### 13.3 Updates
+
+Sparkle checks `https://www.melodash.app/appcast.xml`; each release carries an EdDSA signature
+verified against `SUPublicEDKey` in `Info.plist`. Without that signature the update channel would
+be a way to push arbitrary code onto users' machines, so the private key — held only in the
+developer's login keychain — is the root of trust for every future update and is **unrecoverable
+if lost**.
+
+Two consequences worth remembering: `CURRENT_PROJECT_VERSION` must increment each release (Sparkle
+orders by it, and the releases page on the site sorts by it), and the appcast's enclosure `length`
+must match the DMG byte-for-byte or Sparkle silently stops offering the update.
+
+### 13.4 Why not the App Store
+
+The obstacles are content and process, not tooling.
+
+| Risk | Detail |
+|---|---|
+| **Lyrics** (likely blocker) | `LyricsService` pulls synced lyrics from LRCLIB and a scraping aggregator — unlicensed distribution of licensed content, **guideline 5.2**. Lyrics are on screen during every performance. |
+| **Apple Music terms** | Catalog playback as karaoke backing, scored in real time, stretches the API's limits on derivative/manipulated use — compounded by third-party lyrics over Apple's licensed audio. |
+| **Reviewability** | A 2–5 player local singing game needs a reviewer to sing. Without a demo video, review notes, and a local-import path that works with no Apple Music subscription, "unable to review" is the likely outcome. |
+| **Sandbox + Sparkle** | A Mac App Store build is a fork: re-add the App Sandbox, and remove Sparkle entirely — third-party updaters are disallowed. |
+| **Face data** | On-device Vision, nothing transmitted — defensible, but the privacy labels must say so and review notes should state it up front. |
+
+**The App Store Connect record should be kept, not deleted.** An unsubmitted record costs nothing;
+deleting one **permanently burns its bundle ID**, and `me.babonoo.kemon` could never back another
+record. Since a new bundle ID would make macOS treat the result as a different app, existing
+direct-download users would not upgrade into it. Direct distribution never touches App Store
+Connect — Developer ID signing and notarization are separate systems.
+
+---
+
+## 14. Appendix — module map
 
 ```
 Melodash/
