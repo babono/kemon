@@ -8,7 +8,7 @@
             <sparkle:version>1</sparkle:version>
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://www.melodash.app/releases/Melodash-1.0.dmg" length="27488889" type="application/octet-stream" sparkle:edSignature="Mnh3sLSXh+rvAK9MPOfWY1+sf3XAzEvkpVAjJOJa5pVfDbcawvY7x0KptRuibjySnVNZDqjzqiHLyTvp+l3xCw=="/>
+            <enclosure url="https://www.melodash.app/releases/Melodash-1.0.dmg" length="27857168" type="application/octet-stream" sparkle:edSignature="vTXPEWKJiZlMlYnlyoB9PH5oHBnIRLFZrITbS9hWYw55jpSFAiBTltZWPcH/mwB0jsLgFZsyHeKkxLFYng2LAA=="/>
         </item>
     </channel>
 </rss>

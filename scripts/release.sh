@@ -33,7 +33,6 @@ BUILD_DIR="$PROJECT_ROOT/build"
 ARCHIVE="$BUILD_DIR/$APP_NAME.xcarchive"
 EXPORT_DIR="$BUILD_DIR/export"
 APP="$EXPORT_DIR/$APP_NAME.app"
-DMG_STAGE="$BUILD_DIR/dmg"
 
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$1"; }
 die() { printf '\n\033[1;31mError:\033[0m %s\n' "$1" >&2; exit 1; }
@@ -145,17 +144,13 @@ VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/
 DMG="$BUILD_DIR/$APP_NAME-$VERSION.dmg"
 
 log "Building $APP_NAME-$VERSION.dmg"
-rm -rf "$DMG_STAGE"
-mkdir -p "$DMG_STAGE"
-cp -R "$APP" "$DMG_STAGE/"
-# Drag-to-install target, so the window explains itself without instructions.
-ln -s /Applications "$DMG_STAGE/Applications"
 
-hdiutil create \
-  -volname "$APP_NAME" \
-  -srcfolder "$DMG_STAGE" \
-  -ov -format UDZO \
-  "$DMG" >/dev/null
+# Styling lives in build-dmg.sh, which drives Finder over AppleScript. A
+# library that writes .DS_Store directly (dmgbuild) was tried first and set
+# icon size and positions correctly, but current macOS Finder ignores the
+# legacy background-image alias it writes, so the window came up bare.
+"$PROJECT_ROOT/scripts/build-dmg.sh" "$APP" "$DMG" \
+  || die "DMG packaging failed"
 
 # The DMG is signed and notarized separately from the app inside it; without
 # this the download itself trips Gatekeeper even though the app is clean.
