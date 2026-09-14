@@ -24,9 +24,9 @@ import UniformTypeIdentifiers
 
 // MARK: - Layout
 //
-// Point geometry of the DMG window's content area. dmgbuild positions the two
-// real Finder icons on top of this art, so ICON_CENTER_Y / *_ICON_X here must
-// stay in step with settings in scripts/dmg-settings.py.
+// Point geometry of the DMG window's content area. build-dmg.sh positions the
+// two real Finder icons on top of this art, so the coordinates here must stay
+// in step with the ones in scripts/build-dmg.sh.
 
 let W: CGFloat = 660
 let H: CGFloat = 420
@@ -41,9 +41,9 @@ let appsIconX: CGFloat = 485
 // dark art the names would be unreadable. Painting a light plate behind each
 // one is the way to keep the cosmic background and still read the labels.
 //
-// Measured against a real build: with a 128pt icon centred at y=250, the label
-// baseline band sits at roughly y=330.
-let labelCenterY: CGFloat = 330
+// Measured against a real build: with a 128pt icon centred at y=250, Finder's
+// label text centres on roughly y=334.
+let labelCenterY: CGFloat = 334
 let labelFontSize: CGFloat = 13      // matches text_size set on the window
 let appLabel = "Melodash"            // Melodash.app with the extension hidden
 let appsLabel = "Applications"
