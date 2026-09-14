@@ -35,6 +35,19 @@ let iconCenterY: CGFloat = 250   // from the TOP, matching Finder's convention
 let appIconX: CGFloat = 175
 let appsIconX: CGFloat = 485
 
+// Finder draws each icon's name below it, and — once a background picture is
+// set — always in black, whatever the system appearance. There is no label
+// colour control in .DS_Store or Finder's AppleScript dictionary, so on this
+// dark art the names would be unreadable. Painting a light plate behind each
+// one is the way to keep the cosmic background and still read the labels.
+//
+// Measured against a real build: with a 128pt icon centred at y=250, the label
+// baseline band sits at roughly y=330.
+let labelCenterY: CGFloat = 330
+let labelFontSize: CGFloat = 13      // matches text_size set on the window
+let appLabel = "Melodash"            // Melodash.app with the extension hidden
+let appsLabel = "Applications"
+
 // MARK: - Palette (from the app and melodash.app)
 
 let bgTop    = CGColor(red: 0.016, green: 0.027, blue: 0.098, alpha: 1) // #04071a
@@ -132,6 +145,43 @@ func drawArrow(_ ctx: CGContext, centerX: CGFloat, topY: CGFloat) {
     ctx.restoreGState()
 }
 
+/// Width of `text` as Finder will lay it out, so the plate behind it is sized
+/// to the real label rather than a guess.
+func labelWidth(_ text: String) -> CGFloat {
+    let f = CTFontCreateUIFontForLanguage(.system, labelFontSize, nil)
+        ?? CTFontCreateWithName("Helvetica" as CFString, labelFontSize, nil)
+    let attrs: CFDictionary = [kCTFontAttributeName: f] as CFDictionary
+    guard let s = CFAttributedStringCreate(nil, text as CFString, attrs) else { return 80 }
+    return CTLineGetBoundsWithOptions(
+        CTLineCreateWithAttributedString(s), .useOpticalBounds).width
+}
+
+/// The readable plate behind one icon label.
+func drawLabelPlate(_ ctx: CGContext, centerX: CGFloat, text: String) {
+    // Generous horizontal padding: Finder's label font is not exactly the one
+    // measured here, and a plate that ends flush with the text looks cramped.
+    let w = labelWidth(text) + 26
+    let h: CGFloat = 25
+    let rect = CGRect(x: centerX - w / 2,
+                      y: H - labelCenterY - h / 2,
+                      width: w, height: h)
+    let path = CGPath(roundedRect: rect, cornerWidth: h / 2, cornerHeight: h / 2,
+                      transform: nil)
+
+    ctx.saveGState()
+    // Near-white, slightly translucent so the starfield still shows through and
+    // the plate reads as part of the art rather than a pasted-on box.
+    ctx.setFillColor(CGColor(red: 0.925, green: 0.945, blue: 1.0, alpha: 0.93))
+    ctx.addPath(path)
+    ctx.fillPath()
+    // Faint cyan rim, echoing the app's accent and softening the hard edge.
+    ctx.setStrokeColor(CGColor(red: 0.239, green: 0.851, blue: 1.0, alpha: 0.30))
+    ctx.setLineWidth(1)
+    ctx.addPath(path)
+    ctx.strokePath()
+    ctx.restoreGState()
+}
+
 /// Sparse starfield, echoing the app's cosmic backdrop. Seeded so repeated
 /// runs produce an identical PNG and don't show up as noise in git diffs.
 func drawStars(_ ctx: CGContext) {
@@ -193,6 +243,9 @@ func render(scale: CGFloat, to url: URL) {
                  x: W / 2, topY: 108)
 
     drawArrow(ctx, centerX: (appIconX + appsIconX) / 2, topY: iconCenterY)
+
+    drawLabelPlate(ctx, centerX: appIconX, text: appLabel)
+    drawLabelPlate(ctx, centerX: appsIconX, text: appsLabel)
 
     guard let image = ctx.makeImage(),
           let dest = CGImageDestinationCreateWithURL(
